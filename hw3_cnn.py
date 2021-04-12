@@ -7,7 +7,6 @@ import numpy as np
 from os import listdir
 import cv2
 from skimage import io
-import keras
 from keras.optimizers import Adam
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
@@ -15,9 +14,11 @@ from keras.models import Model
 #from vis.visualization import visualize_saliency
 #from vis.utils import utils
 from keras.utils.vis_utils import plot_model
+from keras_visualizer import visualizer
 #from keras import activations
 from matplotlib import pyplot as plt
 from keras.applications.vgg16 import VGG16
+from graphviz import Digraph
 
 config = ConfigProto()
 config.gpu_options.allow_growth = True
@@ -59,17 +60,12 @@ model = Sequential()
 
 model.add(Conv2D(32, (3, 3), input_shape=(img_size, img_size, 3)))
 model.add(Activation('sigmoid'))
-model.add(Activation('sigmoid'))
-model.add(Activation('sigmoid'))
-model.add(Activation('sigmoid'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(MaxPooling2D(pool_size=(64, 64)))
 
 model.add(Flatten())
 # model.add(Dense(64))
-# model.add(Dropout(0.1))
+model.add(Dropout(0.1))
 # model.add(Activation('sigmoid'))
-model.add(Dense(16))
-model.add(Dense(8))
 model.add(Dense(4))
 model.add(Dense(2))
 model.add(Activation('softmax'))
@@ -84,6 +80,8 @@ history = model.fit(train_x, train_y,
 
 score = model.evaluate(test_x, test_y)
 pred=model.predict(test_x)
+visualizer(model, format='png', view=True)
+
 
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
@@ -92,7 +90,7 @@ print(model.summary())
 print(history.history.keys())
 
 plt.plot(history.history['accuracy'])
-plt.title('Model Accuracy - 4 hidden - 4 connected')
+plt.title('Model Accuracy - 2 hidden - 2 connected - Dropout 0.1')
 plt.ylabel('Accuracy')
 plt.xlabel('Epochs')
 plt.show()
